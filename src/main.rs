@@ -298,8 +298,46 @@ impl eframe::App for Flasher {
                     .push_str("PineFlash: Invalid json downloaded, could not fetch versions.\n");
                 self.config.versions_checked = true;
             } else {
-                for i in 0..3 {
-                    let version = json.as_ref().unwrap()[i]["tag_name"].as_str().unwrap();
+                // Find N (3) versions to display to the user
+                // The first N-1 slots may include prereleases for an upcoming version.
+                // The latest stable version should always be included.
+                // Prereleases for fully released versions should not be included.
+                // Remaining slots will be filled with old stable versions.
+                // GitHub Draft releases should never be included.
+                const DESIRED_VERSIONS: u8 = 3; // How many versions do we want to find
+                let mut versions_found: u8 = 0; // How many versions have we accepted to display
+                let mut stable_version_accepted: bool = false; // Have we accepted a stable version yet
+                let mut index: usize = 0; // Which release are we currently evaluating
+                while versions_found < DESIRED_VERSIONS {
+                    // Find the release we are evaluating
+                    let release = &json.as_ref().unwrap()[index];
+                    let version = release["tag_name"].as_str().unwrap();
+                    // If this release is a draft, skip it
+                    if release["draft"] == true {
+                        index += 1;
+                        continue;
+                    };
+                    // If this is a prerelease and we are currently trying to fill the last version slot,
+                    // skip this release, as we want to offer at least one stable version
+                    if release["prerelease"] == true && versions_found >= DESIRED_VERSIONS - 1 {
+                        index += 1;
+                        continue;
+                    };
+                    // If this is a prerelease and we have already accepted a stable version, skip this version,
+                    // as we do not want to offer prereleases of old versions
+                    if release["prerelease"] == true && stable_version_accepted == true {
+                        index += 1;
+                        continue;
+                    };
+                    // If this is a stable version, record that we have found one, as we don't want
+                    // any (more) prereleases after this
+                    if release["prerelease"] == false {
+                        stable_version_accepted = true;
+                    };
+
+                    // We will offer this version to the user; count it; extract and store the git tag
+                    versions_found += 1;
+                    index += 1;
                     self.config.vers.push(version.to_string());
                 }
                 self.config.versions_checked = true;
