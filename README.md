@@ -10,7 +10,8 @@
 
 A GUI tool to flash IronOS to the Pinecil V1, V2 and future other pine products.  
 
-If you need help, or want to help out with development, I have a [discord server](https://discord.gg/NHrXJRan7D) and a bridged [matrix space](https://matrix.to/#/#spagett's_cookhouse_of_spaghetti_code.:matrix.org).
+**This is my fork of [Spagett1/pineflash](https://github.com/Spagett1/pineflash).  
+As of 2026-05, [Spagett1](https://github.com/Spagett1) hasn’t been active on GitHub for nearly a year. I have started merging PRs from upstream and trying to resolve the known issues.**
 
 ## Features
 * Auto-fetch the newest stable release of IronOS firmware.
